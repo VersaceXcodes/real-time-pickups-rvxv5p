@@ -1,0 +1,15 @@
+{
+  "timestamp": 1747324960524,
+  "operation": {
+    "id": "backend:specifications:openapi"
+  },
+  "projectId": "real-time-pickups",
+  "files": [
+    {
+      "path": "/mnt/data/real-time-pickups/backend/openapi.yaml",
+      "type": "text",
+      "size": 181935,
+      "dependencies": false
+    }
+  ]
+}

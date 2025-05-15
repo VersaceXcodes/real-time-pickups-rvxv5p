@@ -1,0 +1,15 @@
+{
+  "timestamp": 1747324351657,
+  "operation": {
+    "id": "backend:specifications:asyncapi"
+  },
+  "projectId": "real-time-pickups",
+  "files": [
+    {
+      "path": "/mnt/data/real-time-pickups/backend/asyncapi.yaml",
+      "type": "text",
+      "size": 19446,
+      "dependencies": false
+    }
+  ]
+}

@@ -1,0 +1,621 @@
+asyncapi: 2.0.0
+info:
+  title: SpeedSend Real-time API
+  version: 1.0.0
+  description: >
+    Real-time API for the SpeedSend package delivery platform.
+
+    Handles courier location updates, delivery status changes, messaging, and
+    notifications.
+servers:
+  production:
+    url: wss://api.speedsend.com
+    protocol: wss
+    description: Production WebSocket server
+  development:
+    url: ws://localhost:3000
+    protocol: ws
+    description: Development WebSocket server
+channels:
+  /delivery/location/{delivery_id}:
+    parameters:
+      delivery_id:
+        description: The unique identifier of the delivery
+        schema:
+          type: string
+    publish:
+      summary: Couriers publish their location updates
+      operationId: publish_courier_location
+      message:
+        $ref: "#/components/messages/courier_location_update"
+    subscribe:
+      summary: Receive real-time courier location updates
+      operationId: subscribe_courier_location
+      message:
+        $ref: "#/components/messages/courier_location_update"
+  /delivery/status/{delivery_id}:
+    parameters:
+      delivery_id:
+        description: The unique identifier of the delivery
+        schema:
+          type: string
+    publish:
+      summary: Publish delivery status updates
+      operationId: publish_delivery_status
+      message:
+        $ref: "#/components/messages/delivery_status_update"
+    subscribe:
+      summary: Receive real-time delivery status updates
+      operationId: subscribe_delivery_status
+      message:
+        $ref: "#/components/messages/delivery_status_update"
+  /delivery/eta/{delivery_id}:
+    parameters:
+      delivery_id:
+        description: The unique identifier of the delivery
+        schema:
+          type: string
+    publish:
+      summary: Publish estimated time of arrival updates
+      operationId: publish_delivery_eta
+      message:
+        $ref: "#/components/messages/delivery_eta_update"
+    subscribe:
+      summary: Receive real-time ETA updates
+      operationId: subscribe_delivery_eta
+      message:
+        $ref: "#/components/messages/delivery_eta_update"
+  /delivery/request/matching:
+    publish:
+      summary: System publishes new delivery requests to nearby couriers
+      operationId: publish_delivery_request
+      message:
+        $ref: "#/components/messages/delivery_request_created"
+    subscribe:
+      summary: Couriers subscribe to receive new delivery requests
+      operationId: subscribe_delivery_request
+      message:
+        $ref: "#/components/messages/delivery_request_created"
+  /delivery/matcher/timeout/{delivery_id}:
+    parameters:
+      delivery_id:
+        description: The unique identifier of the delivery
+        schema:
+          type: string
+    publish:
+      summary: System notifies sender when no courier is found
+      operationId: publish_delivery_matcher_timeout
+      message:
+        $ref: "#/components/messages/delivery_matcher_timeout"
+    subscribe:
+      summary: Sender receives notification when no courier is found
+      operationId: subscribe_delivery_matcher_timeout
+      message:
+        $ref: "#/components/messages/delivery_matcher_timeout"
+  /messaging/{delivery_id}:
+    parameters:
+      delivery_id:
+        description: The unique identifier of the delivery
+        schema:
+          type: string
+    publish:
+      summary: Send a message in a delivery conversation
+      operationId: publish_new_message
+      message:
+        $ref: "#/components/messages/new_message"
+    subscribe:
+      summary: Receive messages in a delivery conversation
+      operationId: subscribe_new_message
+      message:
+        $ref: "#/components/messages/new_message"
+  /messaging/read/{delivery_id}:
+    parameters:
+      delivery_id:
+        description: The unique identifier of the delivery
+        schema:
+          type: string
+    publish:
+      summary: Mark messages as read
+      operationId: publish_message_read
+      message:
+        $ref: "#/components/messages/message_read"
+    subscribe:
+      summary: Receive message read receipts
+      operationId: subscribe_message_read
+      message:
+        $ref: "#/components/messages/message_read"
+  /messaging/typing/{delivery_id}:
+    parameters:
+      delivery_id:
+        description: The unique identifier of the delivery
+        schema:
+          type: string
+    publish:
+      summary: Indicate user is typing a message
+      operationId: publish_user_typing
+      message:
+        $ref: "#/components/messages/user_typing"
+    subscribe:
+      summary: Receive typing indicators
+      operationId: subscribe_user_typing
+      message:
+        $ref: "#/components/messages/user_typing"
+  /notifications/user/{user_id}:
+    parameters:
+      user_id:
+        description: The unique identifier of the user
+        schema:
+          type: string
+    publish:
+      summary: System sends notification to a specific user
+      operationId: publish_user_notification
+      message:
+        $ref: "#/components/messages/user_notification"
+    subscribe:
+      summary: User receives notifications
+      operationId: subscribe_user_notification
+      message:
+        $ref: "#/components/messages/user_notification"
+  /courier/status:
+    publish:
+      summary: Couriers publish their availability status
+      operationId: publish_courier_status
+      message:
+        $ref: "#/components/messages/courier_status_update"
+    subscribe:
+      summary: System monitors courier status updates
+      operationId: subscribe_courier_status
+      message:
+        $ref: "#/components/messages/courier_status_update"
+components:
+  messages:
+    courier_location_update:
+      name: courier_location_update
+      title: Courier Location Update
+      summary: Real-time update of a courier's location during delivery
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/courier_location_update"
+    delivery_status_update:
+      name: delivery_status_update
+      title: Delivery Status Update
+      summary: Update when the status of a delivery changes
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/delivery_status_update"
+    delivery_request_created:
+      name: delivery_request_created
+      title: Delivery Request Created
+      summary: Notification about a new delivery request for nearby couriers
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/delivery_request_created"
+    delivery_matcher_timeout:
+      name: delivery_matcher_timeout
+      title: Delivery Matcher Timeout
+      summary: Notification when the system is unable to find a courier
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/delivery_matcher_timeout"
+    delivery_eta_update:
+      name: delivery_eta_update
+      title: Delivery ETA Update
+      summary: Update to the estimated time of arrival for a delivery
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/delivery_eta_update"
+    new_message:
+      name: new_message
+      title: New Message
+      summary: New message in a delivery conversation
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/new_message"
+    message_read:
+      name: message_read
+      title: Message Read
+      summary: Notification when a message has been read
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/message_read"
+    user_typing:
+      name: user_typing
+      title: User Typing
+      summary: Indication that a user is typing a message
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/user_typing"
+    user_notification:
+      name: user_notification
+      title: User Notification
+      summary: Real-time notification for a specific user
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/user_notification"
+    courier_status_update:
+      name: courier_status_update
+      title: Courier Status Update
+      summary: Update to a courier's availability status
+      contentType: application/json
+      payload:
+        $ref: "#/components/schemas/courier_status_update"
+  schemas:
+    courier_location_update:
+      type: object
+      required:
+        - delivery_id
+        - courier_id
+        - location
+        - estimated_arrival_time
+      properties:
+        delivery_id:
+          type: string
+          description: Unique identifier of the delivery
+        courier_id:
+          type: string
+          description: Unique identifier of the courier
+        location:
+          type: object
+          required:
+            - latitude
+            - longitude
+            - timestamp
+          properties:
+            latitude:
+              type: number
+              format: double
+              description: Current latitude coordinate of the courier
+            longitude:
+              type: number
+              format: double
+              description: Current longitude coordinate of the courier
+            accuracy:
+              type: number
+              format: float
+              description: Accuracy of the location in meters
+            heading:
+              type: number
+              format: float
+              description: Direction in degrees (0-359.99)
+            speed:
+              type: number
+              format: float
+              description: Current speed in meters per second
+            timestamp:
+              type: integer
+              format: int64
+              description: Unix timestamp when the location was recorded
+        estimated_arrival_time:
+          type: integer
+          format: int64
+          description: Unix timestamp of the estimated arrival time
+    delivery_status_update:
+      type: object
+      required:
+        - delivery_id
+        - status
+        - timestamp
+      properties:
+        delivery_id:
+          type: string
+          description: Unique identifier of the delivery
+        status:
+          type: string
+          description: New status of the delivery
+          enum:
+            - pending
+            - matching
+            - accepted
+            - en_route_to_pickup
+            - at_pickup
+            - picked_up
+            - en_route_to_delivery
+            - at_delivery
+            - delivered
+            - completed
+            - cancelled
+            - failed
+        timestamp:
+          type: integer
+          format: int64
+          description: Unix timestamp when the status changed
+        location:
+          type: object
+          properties:
+            latitude:
+              type: number
+              format: double
+              description: Latitude coordinate where the status was updated
+            longitude:
+              type: number
+              format: double
+              description: Longitude coordinate where the status was updated
+        notes:
+          type: string
+          description: Optional notes related to the status change
+        updated_by:
+          type: string
+          description: User ID of the person who updated the status
+        estimated_arrival_time:
+          type: integer
+          format: int64
+          description: Updated estimated arrival time if applicable
+    delivery_request_created:
+      type: object
+      required:
+        - delivery_id
+        - package_size
+        - package_weight
+        - pickup_location
+        - estimated_earning
+        - scheduled_pickup_time
+        - created_at
+      properties:
+        delivery_id:
+          type: string
+          description: Unique identifier of the delivery request
+        package_size:
+          type: string
+          description: Size category of the package
+          enum:
+            - small
+            - medium
+            - large
+        package_weight:
+          type: number
+          format: float
+          description: Weight of the package in kilograms
+        pickup_location:
+          type: object
+          required:
+            - latitude
+            - longitude
+          properties:
+            latitude:
+              type: number
+              format: double
+              description: Latitude of the pickup location
+            longitude:
+              type: number
+              format: double
+              description: Longitude of the pickup location
+            address:
+              type: string
+              description: Simplified address string of the pickup location
+        distance_to_pickup:
+          type: number
+          format: float
+          description: Distance to the pickup location in kilometers
+        estimated_earning:
+          type: number
+          format: float
+          description: Estimated earnings for the courier in local currency
+        scheduled_pickup_time:
+          type: integer
+          format: int64
+          description: Unix timestamp of the scheduled pickup time
+        created_at:
+          type: integer
+          format: int64
+          description: Unix timestamp when the delivery request was created
+    delivery_matcher_timeout:
+      type: object
+      required:
+        - delivery_id
+        - message
+        - options
+      properties:
+        delivery_id:
+          type: string
+          description: Unique identifier of the delivery
+        message:
+          type: string
+          description: Explanation message for the timeout
+        options:
+          type: object
+          properties:
+            can_extend_search:
+              type: boolean
+              description: Whether the search radius can be extended
+            can_increase_price:
+              type: boolean
+              description: Whether the price can be increased to attract couriers
+            can_reschedule:
+              type: boolean
+              description: Whether the delivery can be rescheduled
+    delivery_eta_update:
+      type: object
+      required:
+        - delivery_id
+        - previous_eta
+        - new_eta
+        - is_delayed
+      properties:
+        delivery_id:
+          type: string
+          description: Unique identifier of the delivery
+        previous_eta:
+          type: integer
+          format: int64
+          description: Previous estimated time of arrival as Unix timestamp
+        new_eta:
+          type: integer
+          format: int64
+          description: New estimated time of arrival as Unix timestamp
+        is_delayed:
+          type: boolean
+          description: Whether this update represents a delay
+        delay_reason:
+          type: string
+          description: Reason for the delay if applicable
+        delay_minutes:
+          type: integer
+          description: Delay duration in minutes
+    new_message:
+      type: object
+      required:
+        - message_id
+        - delivery_id
+        - sender_id
+        - sender_name
+        - sender_type
+        - message_type
+        - sent_at
+      properties:
+        message_id:
+          type: string
+          description: Unique identifier of the message
+        delivery_id:
+          type: string
+          description: Unique identifier of the delivery
+        sender_id:
+          type: string
+          description: Unique identifier of the message sender
+        sender_name:
+          type: string
+          description: Display name of the message sender
+        sender_type:
+          type: string
+          description: Role of the sender in the delivery
+          enum:
+            - sender
+            - courier
+            - recipient
+            - system
+        message_type:
+          type: string
+          description: Type of message content
+          enum:
+            - text
+            - image
+            - system
+        content:
+          type: string
+          description: Text content of the message
+        image_url:
+          type: string
+          format: uri
+          description: URL of the image if message_type is 'image'
+        sent_at:
+          type: integer
+          format: int64
+          description: Unix timestamp when the message was sent
+    message_read:
+      type: object
+      required:
+        - message_id
+        - delivery_id
+        - reader_id
+        - read_at
+      properties:
+        message_id:
+          type: string
+          description: Unique identifier of the message that was read
+        delivery_id:
+          type: string
+          description: Unique identifier of the delivery
+        reader_id:
+          type: string
+          description: Unique identifier of the user who read the message
+        read_at:
+          type: integer
+          format: int64
+          description: Unix timestamp when the message was read
+    user_typing:
+      type: object
+      required:
+        - delivery_id
+        - user_id
+        - user_name
+        - is_typing
+      properties:
+        delivery_id:
+          type: string
+          description: Unique identifier of the delivery
+        user_id:
+          type: string
+          description: Unique identifier of the user who is typing
+        user_name:
+          type: string
+          description: Display name of the user who is typing
+        is_typing:
+          type: boolean
+          description: Whether the user is currently typing
+    user_notification:
+      type: object
+      required:
+        - notification_id
+        - type
+        - title
+        - body
+        - created_at
+      properties:
+        notification_id:
+          type: string
+          description: Unique identifier of the notification
+        type:
+          type: string
+          description: Type of notification
+          enum:
+            - delivery_update
+            - message
+            - payment
+            - promo
+            - system
+        title:
+          type: string
+          description: Title of the notification
+        body:
+          type: string
+          description: Main content of the notification
+        data:
+          type: object
+          properties:
+            delivery_id:
+              type: string
+              description: Associated delivery ID if applicable
+            action:
+              type: string
+              description: Deep link action for the notification
+            screen:
+              type: string
+              description: Target screen in the app
+            entity_id:
+              type: string
+              description: Relevant entity ID for the notification action
+        created_at:
+          type: integer
+          format: int64
+          description: Unix timestamp when the notification was created
+    courier_status_update:
+      type: object
+      required:
+        - courier_id
+        - status
+        - updated_at
+      properties:
+        courier_id:
+          type: string
+          description: Unique identifier of the courier
+        status:
+          type: string
+          description: Current availability status of the courier
+          enum:
+            - available
+            - busy
+            - offline
+        updated_at:
+          type: integer
+          format: int64
+          description: Unix timestamp when the status was updated
+        location:
+          type: object
+          properties:
+            latitude:
+              type: number
+              format: double
+              description: Current latitude coordinate of the courier
+            longitude:
+              type: number
+              format: double
+              description: Current longitude coordinate of the courier
